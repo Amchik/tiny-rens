@@ -10,6 +10,21 @@ caching or etc.
 Good if `systemd-resolved` is is not available
 in your country.
 
+Run `tiny-rens` as a service and set it as default
+nameserver. If you use `resolvconf`, do that:
+
+```console
+$ my-rc-services tiny-rens start-background
+Started DNS server on 127.0.0.51:53
+$ sudo su
+# echo 'name_servers=127.0.0.51' >> /etc/resolvconf.conf
+# resolvconf -u
+```
+
+Now you'r apps will use DoH for DNS queries.
+TIP: if you use OpenRC as init system, you can use
+[this service config](https://gist.github.com/ValgrindLLVM/00a877ec1211c53946e0b76b00f3a3c8).
+
 By the way, "tiny" prefixes are usually shit
 version of normal programs (tcc for example),
 but in this case it better than rens. Anyway,

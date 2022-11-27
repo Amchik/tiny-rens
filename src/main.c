@@ -14,6 +14,8 @@
 #define HOSTNAME  "127.0.0.51"
 #define DNSSERVER "1.1.1.1"
 
+#define VERSION   "1.0.0"
+
 typedef struct {
 	uint8_t *ptr;
 	size_t   len;
@@ -76,11 +78,13 @@ int main(int argc, char **argv) {
 	hints.ai_next      = 0;
 
 	if (argc > 1 && (!strcmp("-h", argv[1]) || !strcmp("--help", argv[1]))) {
-		printf("Usage: %s [port | -] [hostname | -] [dnsserver]\n"
+		printf("Usage: %s [port | -] [hostname | -] [dnsserver | -]\n"
 			   "       %s [--help | -h]\n"
 			   "Default: port=%s hostname=%s\n"
-			   "         dnsserver=%s\n",
-			   argv[0], argv[0], PORT, HOSTNAME, DNSSERVER);
+			   "         dnsserver=%s\n"
+			   "Version: %s\n"
+			   "Author:  ValgrindLLVM <valgrindllvm@proton.me>\n",
+			   argv[0], argv[0], PORT, HOSTNAME, DNSSERVER, VERSION);
 		return 0;
 	}
 
