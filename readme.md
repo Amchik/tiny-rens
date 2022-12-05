@@ -1,6 +1,6 @@
 <div align="center">
   <h1>tiny-rens 🚀</h1>
-  <p>Blazingly slow "DNS server" without cache</p>
+  <p>Local "DNS server" (DNS over HTTPS provider) without cache</p>
 </div>
 
 ## How it's works?
@@ -33,9 +33,9 @@ instead of this slow shit (written on cURL lol).
 
 ## Building
 
-Building requires `libcurl` and ssl shit installed,
-also c compiler and make. IQ that great that 18 is
-optional but recommended.
+Building requires `libcurl4-openssl-dev` installed,
+also c compiler and make. On ubuntu/debian: `apt install libcurl4-openssl-dev build-essentials`.
+IQ that great that 18 is optional but recommended.
 
 ```console
 $ make
@@ -44,23 +44,26 @@ $ make
 TIP: if you need edit config, just copy `default-config.mk`
 to `config.mk`.
 
+You can add some cflags:
+
+ CFLAGS            | Description
+-------------------|-------------------------------------------------------------
+`-D DEBUG`         | Enable debug assertion. For now useless
+`-D NO_DEBUG_LOG`  | Do not enable debug logging. `-g` will be equivalent to `-v`
+`-D BUFF_SIZE=123` | Set custom buffer size, `1024` by default 
+
 ## Usage
 
 ```console
-$ bin/rens -h
-rens: src/main.c:47: int main(): Assertion `rp != 0' failed.
-Aborted
-```
-
-Woops. Real help message:
-
-```console
 $ bin/tiny-rens -h
-Usage: bin/tiny-rens [port | -] [hostname | -] [dnsserver]
-       bin/tiny-rens [--help | -h]
-Default: port=53 hostname=127.0.0.51
-         dnsserver=1.1.1.1
+Usage: bin/tiny-rens [-gvqQh] [port] [hostname] [dns_server]
+port, hostname and dns_server can be '-'
+
+[g] debug [v] info [q] errors [Q] nothing [h] help
+tiny-rens v1.1.0 made by ValgrindLLVM with <3
 ```
+
+Version `1.1.0` is fully compatible with `1.0.0`.
 
 Basic usage is testing it, because `tiny-rens` too slow
 to use it as real dns server. To start `tiny-rens` on
@@ -68,28 +71,13 @@ port 5353 on localhost do: `tiny-rens 5353 localhost`.
 Also `-` can be used as default param. To start `tiny-rens`
 in default port on localhost do `tiny-rens - localhost`.
 
+TIP: use `-v` for information about listening ip/port and dns server.
+`-g` uses for debugging DNS queries (without it analyzing).
+
 ## Perfomance
 
-```console
-$ drill @127.0.0.1 -p 4444 google.com | tail -n4
-;; Query time: 262 msec
-;; SERVER: 127.0.0.1
-;; WHEN: Sun Nov 27 03:43:12 2022
-;; MSG SIZE  rcvd: 44
-$ drill @1.1.1.1 google.com | tail -n4
-;; Query time: 50 msec
-;; SERVER: 1.1.1.1
-;; WHEN: Sun Nov 27 03:44:16 2022
-;; MSG SIZE  rcvd: 44
-```
+Without cache it ~150ms (DoH) vs ~50ms (unsecure DNS).
 
 But I live in beautiful country, where unsecure DNS
 packages can be modified due political reasons...
-
-## To-Do
-
-* Minor bug fixes
-
-Thats final version of `tiny-rens`. Without cache.
-Without normal perfomance.
 

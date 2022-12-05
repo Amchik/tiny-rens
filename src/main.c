@@ -1,177 +1,78 @@
-#include <stdint.h>
-#include <sys/types.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <errno.h>
-#include <curl/curl.h>
 
-#define BUFF_SIZE 1024
-#define PORT      "53"
-#define HOSTNAME  "127.0.0.51"
-#define DNSSERVER "1.1.1.1"
+#include "include/rens.h"
+#include "include/log.h"
 
-#define VERSION   "1.0.0"
+int LOG_LEVEL = LWARN;
 
-typedef struct {
-	uint8_t *ptr;
-	size_t   len;
-} rens_buffer;
-typedef struct {
-	uint8_t *ptr;
-	size_t   len;
-	size_t   cap;
-} rens_vec;
+static char *arguments[3] = { D_PORT, D_HOSTNAME, D_DNSSERVER };
 
-size_t curl_readfn(char *ptr, size_t size, size_t nmemb, void *userp) {
-	rens_buffer *r;
-	size_t nread;
-
-	r = (rens_buffer*)userp;
-	nread = size * nmemb < r->len ? size * nmemb : r->len;
-
-	if (r->len == 0)
-		return 0;
-
-	memcpy(ptr, r->ptr, nread);
-	r->len -= nread;
-	r->ptr += nread;
-
-	return nread;
-}
-size_t curl_writefn(void *data, size_t size, size_t nmemb, void *userp) {
-	rens_vec *r;
-	size_t nread;
-
-	r = (rens_vec*)userp;
-	nread = size * nmemb < (r->cap - r->len) ? size * nmemb : (r->cap - r->len);
-
-	memcpy(r->ptr + r->len, data, nread);
-	r->len += nread;
-
-	return nread;
-}
+void parse_argv(int argc, char **argv);
 
 int main(int argc, char **argv) {
-	struct addrinfo hints;
-	struct addrinfo *result, *rp;
-	int sfd, s;
-	struct sockaddr_storage peer_addr;
-	socklen_t peer_addr_len;
-	ssize_t nread;
-	char buff[BUFF_SIZE], clenbuff[256], *port, *hostname, *dnsserver, url[32];
-	rens_buffer rbuff;
-	rens_vec    rvec;
-	CURL *curl;
-	struct curl_slist *headers;
+	char url[64];
+	int sfd;
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family    = AF_UNSPEC;
-	hints.ai_socktype  = SOCK_DGRAM;
-	hints.ai_flags     = AI_PASSIVE;
-	hints.ai_protocol  = 0;
-	hints.ai_canonname = 0;
-	hints.ai_addr      = 0;
-	hints.ai_next      = 0;
+	parse_argv(argc, argv);
+	sfd = init_server(arguments[1], arguments[0]);
 
-	if (argc > 1 && (!strcmp("-h", argv[1]) || !strcmp("--help", argv[1]))) {
-		printf("Usage: %s [port | -] [hostname | -] [dnsserver | -]\n"
-			   "       %s [--help | -h]\n"
-			   "Default: port=%s hostname=%s\n"
-			   "         dnsserver=%s\n"
-			   "Version: %s\n"
-			   "Author:  ValgrindLLVM <valgrindllvm@proton.me>\n",
-			   argv[0], argv[0], PORT, HOSTNAME, DNSSERVER, VERSION);
-		return 0;
-	}
+	if (sfd < 0)
+		return -sfd;
 
-	if (argc >= 2 && argv[1][0] != '-')
-		port = argv[1];
-	else
-		port = PORT;
-	if (argc >= 3 && argv[2][0] != '-')
-		hostname = argv[2];
-	else
-		hostname = HOSTNAME;
-	if (argc >= 4 && argv[3][0] != '-')
-		dnsserver = argv[3];
-	else
-		dnsserver = DNSSERVER;
+	logf(LINFO, "Started DNS server on %s:%s", arguments[1], arguments[0]);
 
-	s = getaddrinfo(hostname, port, &hints, &result);
-	if (s != 0) {
-		perror("getaddrinfo()");
-		return 1;
-	} else {
-		printf("Started DNS server on %s:%s\n", hostname, port);
-	}
-
-	for (rp = result; rp != 0; rp = rp->ai_next) {
-		sfd = socket(rp->ai_family, rp->ai_socktype,
-				rp->ai_protocol);
-		if (sfd == -1)
-			continue;
-
-		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
-			break;
-
-		close(sfd);
-	}
-
-	freeaddrinfo(result);
-
-	if (rp == 0) {
-		if (errno)
-			perror("Could not bind");
-		else
-			puts("Could not bind");
-		return 2;
-	}
-
-	snprintf(url, sizeof(url), "https://%s/dns-query", dnsserver);
+	snprintf(url, sizeof(url), "https://%s/dns-query", arguments[2]);
+	logf(LINFO, "Using DNS server: %s, %s", arguments[2], url);
 
 	for (;;) {
-		peer_addr_len = sizeof(peer_addr);
-		nread = recvfrom(sfd, buff, sizeof(buff), 0,
-				(struct sockaddr *) &peer_addr, &peer_addr_len);
-		if (nread == -1)
-			continue;
-
-		curl = curl_easy_init();
-
-		rbuff.ptr = (unsigned char*)buff;
-		rbuff.len = nread;
-
-		rvec.ptr = (unsigned char*)buff;
-		rvec.len = 0;
-		rvec.cap = sizeof(buff);
-
-		sprintf(clenbuff, "Content-Length: %lu", rbuff.len);
-
-		headers = curl_slist_append(0, "Content-Type: application/dns-message");
-		headers = curl_slist_append(headers, clenbuff);
-
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
-		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl, CURLOPT_READFUNCTION, curl_readfn);
-		curl_easy_setopt(curl, CURLOPT_READDATA,     &rbuff);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_writefn);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA,     &rvec);
-
-		curl_easy_perform(curl);
-
-		sendto(sfd, rvec.ptr, rvec.len, 0,
-				(struct sockaddr*) &peer_addr,
-				peer_addr_len);
-
-		curl_easy_cleanup(curl);
-		curl_slist_free_all(headers);
+		server_process(sfd, url);
 	}
 
 	return 0;
 }
+
+void parse_argv(int argc, char **argv) {
+	int n, classic_cursor;
+
+	classic_cursor = 0;
+
+	for (n = 1; n < argc; ++n) {
+		if (argv[n][0] == '-') {
+			if (argv[n][1] == 0) {
+				classic_cursor++;
+			} else {
+				int r;
+				for (r = 1; argv[n][r] != 0; ++r)
+					switch (argv[n][r]) {
+						case 'Q':
+							LOG_LEVEL = LPRIM;
+							break;
+						case 'q':
+							LOG_LEVEL = LERR;
+							break;
+						case 'v':
+							LOG_LEVEL = LINFO;
+							break;
+						case 'g':
+							LOG_LEVEL = LDEBUG;
+							break;
+						case 'h':
+							printf(
+									"Usage: %s [-gvqQh] [port] [hostname] [dns_server]\n"
+									"port, hostname and dns_server can be '-'\n"
+									"\n"
+									"[g] debug [v] info [q] errors [Q] nothing [h] help\n"
+									"tiny-rens v" VERSION " made by ValgrindLLVM with <3\n",
+									argv[0]);
+							exit(0);
+							break;
+					}
+			}
+		} else if (classic_cursor < sizeof(arguments)) {
+			arguments[classic_cursor] = argv[n];
+			classic_cursor++;
+		}
+	}
+}
+
