@@ -3,17 +3,21 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#include "include/rens.h"
-#include "include/log.h"
+#include "../include/rens-dns.h"
+#include "../include/log.h"
 
 static size_t curl_readfn(char *ptr, size_t size, size_t nmemb, void *userp);
 static size_t curl_writefn(void *data, size_t size, size_t nmemb, void *userp);
+
+__inline static void log_question(uint8_t *buff);
+__inline static void log_answer(uint8_t *buff);
 
 void server_process(int sfd, const char *url) {
 	struct sockaddr_storage peer_addr;
 	socklen_t peer_addr_len;
 	ssize_t nread;
-	char buff[BUFF_SIZE], clenbuff[128];
+	uint8_t buff[BUFF_SIZE];
+	char clenbuff[128];
 	rens_buffer rbuff;
 	rens_vec    rvec;
 	CURL *curl;
@@ -25,8 +29,7 @@ void server_process(int sfd, const char *url) {
 	if (nread < 2)
 		return;
 
-	dlogf("%d Recieved DNS query of %lu bytes",
-			(buff[0] << 8) + buff[1], nread);
+	log_question(buff);
 
 	curl = curl_easy_init();
 
@@ -53,8 +56,7 @@ void server_process(int sfd, const char *url) {
 
 	curl_easy_perform(curl);
 
-	dlogf("%d Sending DNS answer of length %lu bytes",
-			(buff[0] << 8) + buff[1], rvec.len);
+	log_answer(buff);
 
 	sendto(sfd, rvec.ptr, rvec.len, 0,
 			(struct sockaddr*) &peer_addr,
@@ -92,3 +94,71 @@ static size_t curl_writefn(void *data, size_t size, size_t nmemb, void *userp) {
 
 	return nread;
 }
+
+#if !defined(NO_DEBUG_LOG)
+__inline static void log_question(uint8_t *buff) {
+	size_t i, j, k, m, off;
+	struct RensHeader h;
+
+	h = rens_read_header(buff);
+	dlogf("%lu Recieved query ID %u", h.id, h.id);
+	dlogf("%lu  QDCOUNT: %u", h.id, h.qdcount);
+
+	off = 12;
+	for (i = 0; i < h.qdcount; ++i) {
+		struct RensQuestion q;
+		uint8_t qname[256];
+
+		q = rens_read_question(buff + off);
+		off += q.qname.len + 4;
+
+		m = rens_uncompress_message(buff, q.qname.ptr - buff, qname, sizeof(qname));
+		for (j = 0; j < m; ) {
+			k = qname[j];
+			if (qname[j] == 0)
+				qname[j + 1] = 0;
+			qname[j] = '.';
+			j += k + 1;
+		}
+
+		dlogf("%lu >> QUESTION: %u %u <%s>", h.id, q.qtype, q.qclass, qname);
+	}
+}
+
+__inline static void log_answer(uint8_t *buff) {
+	size_t j, k, m, off;
+	struct RensHeader h;
+	struct RensQuestion q;
+	struct RensResource r;
+	uint8_t qname[256];
+
+	h = rens_read_header(buff);
+	dlogf("%u  RCODE:   %u", h.id, h.rcode);
+	dlogf("%u  ANCOUNT: %u", h.id, h.ancount);
+
+	off = 12;
+	for (size_t i = 0; i < h.qdcount; ++i) {
+		q = rens_read_question(buff + off);
+		off += q.qname.len + 4;
+	}
+	for (size_t i = 0; i < h.ancount; ++i) {
+		r = rens_read_resource(buff + off);
+		off += r.rdata.len + r.name.len + 10;
+
+		m = rens_uncompress_message(buff, r.name.ptr - buff, qname, sizeof(qname));
+		for (j = 0; j < m; ) {
+			k = qname[j];
+			if (qname[j] == 0)
+				qname[j + 1] = 0;
+			qname[j] = '.';
+			j += k + 1;
+		}
+
+		dlogf("%lu >> ANSWER: <%s> %u %u ttl=%u", h.id, qname, r.qtype, r.qclass, r.ttl);
+	}
+	dlogf("");
+}
+#else
+__inline static void log_question(uint8_t *buff) {}
+__inline static void log_answer(uint8_t *buff) {}
+#endif

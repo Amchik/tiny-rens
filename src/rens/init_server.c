@@ -4,8 +4,8 @@
 #include <netdb.h>
 #include <errno.h>
 
-#include "include/rens.h"
-#include "include/log.h"
+#include "../include/rens.h"
+#include "../include/log.h"
 
 int init_server(const char* hostname, const char* port) {
 	struct addrinfo hints, *result, *rp;
