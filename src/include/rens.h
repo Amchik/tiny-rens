@@ -2,6 +2,9 @@
  * rens (tiny-rens) generic functions
  */
 
+#ifndef ev45qpCDOuIDv_v7MX4UROTKPt4C9cD0z6cNKYTqHuH0uPzWX_ssnPkG3O5LmXy0VsMiPw__xuAW
+#define ev45qpCDOuIDv_v7MX4UROTKPt4C9cD0z6cNKYTqHuH0uPzWX_ssnPkG3O5LmXy0VsMiPw__xuAW
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -41,4 +44,6 @@ int init_server(const char* hostname, const char* port);
 /* Wait and process message
  */
 void server_process(int sfd, const char *url);
+
+#endif
 

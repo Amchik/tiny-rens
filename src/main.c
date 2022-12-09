@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 }
 
 void parse_argv(int argc, char **argv) {
-	int n, classic_cursor;
+	size_t n, classic_cursor;
 
 	classic_cursor = 0;
 
