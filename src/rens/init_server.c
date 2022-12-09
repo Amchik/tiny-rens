@@ -19,7 +19,10 @@ int init_server(const char* hostname, const char* port) {
 	s = getaddrinfo(hostname, port, &hints, &result);
 	if (s != 0) {
 		logf(LERR, "Failed to getaddrinfo() on %s:%s", hostname, port);
-		logf(LERR, "OS error %d: %s", errno, strerror(errno));
+		if (errno)
+			logf(LERR, "OS error %d: %s", errno, strerror(errno));
+		else
+			logf(LERR, "Address does not exists.");
 
 		return -1;
 	}
