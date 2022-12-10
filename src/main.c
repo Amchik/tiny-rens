@@ -13,6 +13,7 @@ void parse_argv(int argc, char **argv);
 int main(int argc, char **argv) {
 	char url[64];
 	int sfd;
+	CURL *curl;
 
 	parse_argv(argc, argv);
 	sfd = init_server(arguments[1], arguments[0]);
@@ -25,8 +26,10 @@ int main(int argc, char **argv) {
 	snprintf(url, sizeof(url), "https://%s/dns-query", arguments[2]);
 	logf(LINFO, "Using DNS server: %s, %s", arguments[2], url);
 
+	curl = create_curl_instance(url);
+
 	for (;;) {
-		server_process(sfd, url);
+		server_process(sfd, curl);
 	}
 
 	return 0;

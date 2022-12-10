@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <curl/curl.h>
 
 #define VERSION "1.1.0"
 
@@ -41,9 +42,17 @@ typedef struct {
  */
 int init_server(const char* hostname, const char* port);
 
+/* Create cURL instance
+ */
+CURL *create_curl_instance(const char *url);
+
 /* Wait and process message
  */
-void server_process(int sfd, const char *url);
+void server_process(int sfd, CURL *url);
+
+/* Perform DoH request
+ */
+size_t perform_request(CURL *curl, uint8_t *data, size_t n);
 
 #endif
 
