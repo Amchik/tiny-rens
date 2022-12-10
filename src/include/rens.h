@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <curl/curl.h>
 
-#define VERSION "1.1.0"
+#define VERSION "1.2.0"
 
 #define D_PORT      "53"
 #define D_HOSTNAME  "127.0.0.51"
