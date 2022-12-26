@@ -1,8 +1,7 @@
 /* vim: ft=c
  */
 
-#ifndef EAWn7k633atGuIxFfBPPrQKHor7eJ8lPZ8LL6mULAK4YqtQTWZztwUPqHadLxqkLrc8oGiHQ9ehA
-#define EAWn7k633atGuIxFfBPPrQKHor7eJ8lPZ8LL6mULAK4YqtQTWZztwUPqHadLxqkLrc8oGiHQ9ehA
+#pragma once
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -75,6 +74,4 @@ size_t rens_write_resource(const struct RensResource *resource, uint8_t *buff);
 /* Uncompress message into out
  */
 size_t rens_uncompress_message(uint8_t *in, size_t off, uint8_t *out, size_t n);
-
-#endif
 

@@ -2,8 +2,7 @@
  * rens (tiny-rens) generic functions
  */
 
-#ifndef ev45qpCDOuIDv_v7MX4UROTKPt4C9cD0z6cNKYTqHuH0uPzWX_ssnPkG3O5LmXy0VsMiPw__xuAW
-#define ev45qpCDOuIDv_v7MX4UROTKPt4C9cD0z6cNKYTqHuH0uPzWX_ssnPkG3O5LmXy0VsMiPw__xuAW
+#pragma once
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -53,6 +52,4 @@ void server_process(int sfd, CURL *url);
 /* Perform DoH request
  */
 size_t perform_request(CURL *curl, uint8_t *data, size_t n);
-
-#endif
 

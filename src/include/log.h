@@ -2,8 +2,7 @@
  * Logging header file
  */
 
-#ifndef SJ6DIPA1m_r4kzqxvQaR99ZCHzVQ3DV_2rymbogQ_jVYm0Z6xZ1aCaFZisS5pfAn_VPrtwtLpR2p
-#define SJ6DIPA1m_r4kzqxvQaR99ZCHzVQ3DV_2rymbogQ_jVYm0Z6xZ1aCaFZisS5pfAn_VPrtwtLpR2p
+#pragma once
 
 #define assert(expr, msg) \
 	if (!(expr)) {\
@@ -35,6 +34,4 @@ extern int LOG_LEVEL;
 #define LDEBUG 4
 
 void logf(int log_level, const char *fmt, ...);
-
-#endif
 
