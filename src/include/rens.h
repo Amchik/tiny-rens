@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "rens-cache.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <curl/curl.h>
@@ -26,17 +27,6 @@
 	#define BUFF_SIZE 1024
 #endif
 
-typedef struct {
-	uint8_t *ptr;
-	size_t   len;
-} rens_buffer;
-
-typedef struct {
-	uint8_t *ptr;
-	size_t   len;
-	size_t   cap;
-} rens_vec;
-
 /* Inits server and returns server fd
  */
 int init_server(const char* hostname, const char* port);
@@ -47,7 +37,7 @@ CURL *create_curl_instance(const char *url);
 
 /* Wait and process message
  */
-void server_process(int sfd, CURL *url);
+void server_process(int sfd, CURL *url, rc_vector *cache);
 
 /* Perform DoH request
  */

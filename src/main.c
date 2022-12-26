@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "include/rens-cache.h"
 #include "include/rens.h"
 #include "include/log.h"
 
@@ -14,6 +15,7 @@ int main(int argc, char **argv) {
 	char url[64];
 	int sfd;
 	CURL *curl;
+	rc_vector cache;
 
 	parse_argv(argc, argv);
 	sfd = init_server(arguments[1], arguments[0]);
@@ -27,9 +29,10 @@ int main(int argc, char **argv) {
 	logf(LINFO, "Using DNS server: %s, %s", arguments[2], url);
 
 	curl = create_curl_instance(url);
+	cache = rc_new();
 
 	for (;;) {
-		server_process(sfd, curl);
+		server_process(sfd, curl, &cache);
 	}
 
 	return 0;

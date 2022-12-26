@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "rens.h"
+#include "rens-types.h"
 
 #define RENS_QR 1
 #define RENS_AA 2
