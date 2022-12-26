@@ -6,7 +6,16 @@
 
 #include "pretty.h"
 
-#define VERSION "1.3.0"
+#define BASE_VERSION "1.3.0"
+
+#ifndef BUILD_RELEASE
+	#ifndef BUILD_COMMIT
+		#define BUILD_COMMIT "modified (" __DATE__ " " __TIME__ ")"
+	#endif
+	#define VERSION BASE_VERSION "-" BUILD_COMMIT
+#else
+	#define VERSION BASE_VERSION
+#endif
 
 #define D_PORT      "53"
 #define D_HOSTNAME  "127.0.0.51"
