@@ -1,5 +1,4 @@
-#include "../include/rens-cache.h"
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 /* By the way, this function every time parses
  * vector question block and trying to find q.qname == el.qname.

@@ -1,4 +1,4 @@
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 struct RensQuestion rens_read_question(const uint8_t *buff) {
 	struct RensQuestion q;

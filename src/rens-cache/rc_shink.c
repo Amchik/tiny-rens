@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "../include/log.h"
-#include "../include/rens-cache.h"
+#include "../include/rens.h"
 
 /* This part also stolen from rens. It should be
  * inlined, so we add magic __inline.

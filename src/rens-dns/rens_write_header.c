@@ -1,4 +1,4 @@
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 size_t rens_write_header(const struct RensHeader *header, uint8_t *buff) {
 	buff[0] = header->id >> 8;

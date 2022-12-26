@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/rens-cache.h"
 #include "include/rens.h"
 #include "include/log.h"
 

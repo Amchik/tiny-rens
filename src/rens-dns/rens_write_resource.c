@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 size_t rens_write_resource(const struct RensResource *resource, uint8_t *buff) {
 	size_t namelen;

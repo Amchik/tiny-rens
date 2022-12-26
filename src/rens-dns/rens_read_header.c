@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 struct RensHeader rens_read_header(const uint8_t *buff) {
 	struct RensHeader h;

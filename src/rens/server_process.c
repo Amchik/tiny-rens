@@ -3,8 +3,6 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#include "../include/rens-dns.h"
-#include "../include/rens-cache.h"
 #include "../include/rens.h"
 #include "../include/log.h"
 

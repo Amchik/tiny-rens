@@ -1,4 +1,7 @@
 /* vim: ft=c
+ * Rens (tiny-rens) DNS implementation
+ * This file originally written as part of
+ *  rens project and fixed in tiny-rens.
  */
 
 #pragma once
@@ -6,7 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "rens-types.h"
+#include "types.h"
+#include "pretty.h"
 
 #define RENS_QR 1
 #define RENS_AA 2

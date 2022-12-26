@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "../include/log.h"
-#include "../include/rens-cache.h"
+#include "../include/rens.h"
 
 void rc_extend(rc_vector *vec) {
 	vec->ptr = realloc(vec->ptr,

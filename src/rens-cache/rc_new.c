@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "../include/rens-cache.h"
+#include "../include/rens.h"
 
 rc_vector rc_new() {
 	rc_vector r;

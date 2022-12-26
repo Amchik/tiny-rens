@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "../include/rens-dns.h"
+#include "../include/rens.h"
 
 size_t rens_uncompress_message(uint8_t *in, size_t off, uint8_t *out, size_t n) {
 	size_t i, nwrite, to_write;

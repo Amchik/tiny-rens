@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "../include/log.h"
-#include "../include/rens-cache.h"
+#include "../include/rens.h"
 
 rc_object *rc_push(rc_vector *vec, uint8_t *data, size_t len) {
 	if (vec->len == vec->cap)

@@ -1,11 +1,13 @@
 /* vim: ft=c
- * TODO: FIX THAT SHIT
+ * Rens (tiny-rens) primitive types declaration
  */
 
 #pragma once
 
 #include <stdint.h>
 #include <stdlib.h>
+
+#include "pretty.h"
 
 typedef struct {
 	uint8_t *ptr;
