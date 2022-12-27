@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 	if (CACHE_POLICY == CP_NORMAL)
 		run_rc_thread(&cache);
 
-	cache_ptr = CP_NONE ? 0 : &cache;
+	cache_ptr = CACHE_POLICY == CP_NONE ? 0 : &cache;
 	for (;;) {
 		server_process(sfd, curl, cache_ptr);
 	}
