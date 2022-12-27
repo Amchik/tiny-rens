@@ -10,7 +10,7 @@
 
 #ifndef BUILD_RELEASE
 	#ifndef BUILD_COMMIT
-		#define BUILD_COMMIT "modified (" __DATE__ " " __TIME__ ")"
+		#define BUILD_COMMIT "dev (" __DATE__ " " __TIME__ ")"
 	#endif
 	#define VERSION BASE_VERSION "-" BUILD_COMMIT
 #else
