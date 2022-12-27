@@ -5,6 +5,7 @@ sources := $(wildcard src/*.c src/**/*.c)
 objects := $(patsubst src/%.c,out/%.o,${sources})
 binary  := tiny-rens
 
+.PHONY: clean ${sources}
 all: bin/${binary}
 
 out/%.o: src/%.c

@@ -27,3 +27,7 @@ void server_process(int sfd, CURL *url, rc_vector *cache);
  */
 size_t perform_request(CURL *curl, uint8_t *data, size_t n);
 
+/* Create and run RC cleaning thread
+ */
+void run_rc_thread(rc_vector *cache);
+

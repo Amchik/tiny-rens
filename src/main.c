@@ -5,6 +5,7 @@
 #include "include/log.h"
 
 int LOG_LEVEL = LWARN;
+enum { CP_NONE, CP_NORMAL, CP_NOTTL } CACHE_POLICY = CP_NORMAL;
 
 static char *arguments[3] = { D_PORT, D_HOSTNAME, D_DNSSERVER };
 
@@ -14,7 +15,7 @@ int main(int argc, char **argv) {
 	char url[64];
 	int sfd;
 	CURL *curl;
-	rc_vector cache;
+	rc_vector cache, *cache_ptr;
 
 	parse_argv(argc, argv);
 	sfd = init_server(arguments[1], arguments[0]);
@@ -28,10 +29,15 @@ int main(int argc, char **argv) {
 	logf(LINFO, "Using DNS server: %s, %s", arguments[2], url);
 
 	curl = create_curl_instance(url);
-	cache = rc_new();
+	if (CACHE_POLICY != CP_NONE)
+		cache = rc_new();
 
+	if (CACHE_POLICY == CP_NORMAL)
+		run_rc_thread(&cache);
+
+	cache_ptr = CP_NONE ? 0 : &cache;
 	for (;;) {
-		server_process(sfd, curl, &cache);
+		server_process(sfd, curl, cache_ptr);
 	}
 
 	return 0;
@@ -63,11 +69,18 @@ void parse_argv(int argc, char **argv) {
 						case 'g':
 							LOG_LEVEL = LDEBUG;
 							break;
+						case 'c':
+							CACHE_POLICY = CP_NONE;
+							break;
+						case 'C':
+							CACHE_POLICY = CP_NOTTL;
+							break;
 						case 'h':
 							printf(
-									"Usage: %s [-gvqQh] [port] [hostname] [dns_server]\n"
+									"Usage: %s [-gvqQhcC] [port] [hostname] [dns_server]\n"
 									"port, hostname and dns_server can be '-'\n"
 									"\n"
+									"[c] no cache [C] cache wo/ ttl\n"
 									"[g] debug [v] info [q] errors [Q] nothing [h] help\n"
 									"tiny-rens v" VERSION " made by ValgrindLLVM with <3\n",
 									argv[0]);

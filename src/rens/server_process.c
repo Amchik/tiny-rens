@@ -26,34 +26,38 @@ void server_process(int sfd, CURL *curl, rc_vector *cache) {
 
 	log_question(buff);
 
-	pthread_mutex_lock(&cache->mut);
+	if (cache) {
+		pthread_mutex_lock(&cache->mut);
 
-	q = rens_read_question(buff + 12);
-	obj = rc_find(cache, q);
-	if (obj != 0) {
-		h = rens_read_header(obj->buff.ptr);
-		hr = rens_read_header(buff);
-		dlogf("%lu Found cached item ID %lu",
-				hr.id, h.id);
-		h.id = hr.id;
-		rens_write_header(&h, buff);
-		sendto(sfd, buff, 12, MSG_MORE,
-				(struct sockaddr*) &peer_addr,
-				peer_addr_len);
-		sendto(sfd, obj->buff.ptr + 12, obj->buff.len - 12, 0,
-				(struct sockaddr*) &peer_addr,
-				peer_addr_len);
+		q = rens_read_question(buff + 12);
+		obj = rc_find(cache, q);
+		if (obj != 0) {
+			h = rens_read_header(obj->buff.ptr);
+			hr = rens_read_header(buff);
+			dlogf("%lu Found cached item ID %lu",
+					hr.id, h.id);
+			h.id = hr.id;
+			rens_write_header(&h, buff);
+			sendto(sfd, buff, 12, MSG_MORE,
+					(struct sockaddr*) &peer_addr,
+					peer_addr_len);
+			sendto(sfd, obj->buff.ptr + 12, obj->buff.len - 12, 0,
+					(struct sockaddr*) &peer_addr,
+					peer_addr_len);
+			pthread_mutex_unlock(&cache->mut);
+			return;
+		}
+
 		pthread_mutex_unlock(&cache->mut);
-		return;
 	}
-
-	pthread_mutex_unlock(&cache->mut);
 
 	nread = perform_request(curl, buff, nread);
 
-	pthread_mutex_lock(&cache->mut);
-	rc_push(cache, buff, nread);
-	pthread_mutex_unlock(&cache->mut);
+	if (cache) {
+		pthread_mutex_lock(&cache->mut);
+		rc_push(cache, buff, nread);
+		pthread_mutex_unlock(&cache->mut);
+	}
 
 	log_answer(buff);
 
@@ -66,6 +70,9 @@ void server_process(int sfd, CURL *curl, rc_vector *cache) {
 __inline static void log_question(uint8_t *buff) {
 	size_t i, j, k, m, off;
 	struct RensHeader h;
+
+	if (LOG_LEVEL < LDEBUG)
+		return;
 
 	h = rens_read_header(buff);
 	dlogf("%lu Recieved query ID %u", h.id, h.id);
@@ -98,6 +105,9 @@ __inline static void log_answer(uint8_t *buff) {
 	struct RensQuestion q;
 	struct RensResource r;
 	uint8_t qname[256];
+
+	if (LOG_LEVEL < LDEBUG)
+		return;
 
 	h = rens_read_header(buff);
 	dlogf("%u  RCODE:   %u", h.id, h.rcode);
