@@ -10,12 +10,14 @@ sources := $(wildcard src/*.c src/**/*.c)
 objects := $(patsubst src/%.c,out/%.o,${sources})
 binary  := tiny-rens
 
+vername := $(shell git rev-parse --abbrev-ref HEAD)
+
 .PHONY: clean ${sources}
 all: bin/${binary}
 
 out/%.o: src/%.c
 	@mkdir -p $(@D)
-	${cc} ${cflags} -c -o $@ $<
+	${cc} ${cflags} -DBUILD_COMMIT="\"${vername}\"" -c -o $@ $<
 
 bin/${binary}: ${objects}
 	@mkdir -p $(@D)
