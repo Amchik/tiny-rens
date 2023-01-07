@@ -1,5 +1,10 @@
-config := $(shell test -e config.mk && echo config.mk || echo config-default.mk)
-include ${config}
+cc := cc
+cflags := -O3 -lto -DBUILD_RELEASE
+ldflags := -lcurl
+strip := -s
+ifneq ("$(wildcard config.mk)","")
+	include config.mk
+endif
 
 sources := $(wildcard src/*.c src/**/*.c)
 objects := $(patsubst src/%.c,out/%.o,${sources})

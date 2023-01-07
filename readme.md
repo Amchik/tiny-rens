@@ -14,6 +14,13 @@ cache, otherwise last version.
 $ git checkout v1.1.0
 ```
 
+## Experimental
+
+This is an experimental branch, use at own risk.
+
+You can see some features in other branches with prefix
+`experimental/`, for example `experimental/no-libc`.
+
 ## How it's works?
 
 Just forward packages over HTTPS (DoH) with
