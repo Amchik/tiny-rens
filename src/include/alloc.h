@@ -64,10 +64,10 @@
 #define realloc _libc_malloc
 #define calloc  _libc_malloc
 
-/* Claim and keep ref locked. Looks like ref_claim(ptr) and ref_lock(ptr)
+/* Claim and keep ref locked. Works like ref_claim(ptr) and ref_lock(ptr)
  */
 #define ref_claim_lock(ptr) ref_lock(ptr); /* SAFETY: <- */ ref_claim_unlocked(ptr)
-/* Drops and unlock ref. Looks like ref_unlock(ptr) and ref_drop(ptr)
+/* Drops and unlock ref. Works like ref_unlock(ptr) and ref_drop(ptr)
  */
 #define ref_drop_unlock(ptr) if (ref_drop_unlocked(ptr)) /* SAFETY: <- */ ref_unlock(ptr)
 
